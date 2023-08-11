@@ -2,8 +2,8 @@ name: appflowy
 version: 0.2.8
 adopt-info: appflowy
 website: https://appflowy.io
-contact: https://github.com/kenvandine/appflowy-snap/issues
-issues: https://github.com/kenvandine/appflowy-snap/issues
+contact: support@appflowy.io
+issues: https://github.com/AppFlowy-IO/AppFlowy/issues
 source-code: https://github.com/AppFlowy-IO/AppFlowy
 icon: snap/gui/icon.svg
 confinement: strict
@@ -48,7 +48,7 @@ parts:
       - opt/AppFlowy
       - usr/share/applications
       - usr/share/appdata
- 
+
   deps:
     plugin: dump
     source: http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb

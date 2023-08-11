@@ -17,13 +17,13 @@ jobs:
       - name: Fetch release version
         run: |
           VERSION=$(
-            curl -sL https://api.github.com/repos/AppFlowy-IO/appflowy/releases | 
+            curl -sL https://api.github.com/repos/AppFlowy-IO/appflowy/releases |
             jq .  | grep tag_name | grep -v beta | grep -v rc | head -n 1 | cut -d'"' -f4 | tr -d 'v'
           )
           if [ ${#VERSION} -gt 0 ]; then
             sed -i 's/^\(version: \).*$/\1'"$VERSION"'/' snap/snapcraft.yaml
           fi
-          
+
       - name: Check for modified files
         id: git-check
         run: |
@@ -32,7 +32,7 @@ jobs:
       - name: Commit latest release version
         if: steps.git-check.outputs.modified == 'true'
         run: |
-          git config --global user.name 'Ken VanDine'
-          git config --global user.email 'ken@vandine.org'
+          git config --global user.name 'Lucas.Xu'
+          git config --global user.email 'lucas.xu@appflowy.io'
           git commit -am "Automatic sync to latest release"
           git push
