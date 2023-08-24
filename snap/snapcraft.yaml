@@ -49,6 +49,7 @@ parts:
       - usr/share/icons
       - usr/share/metainfo
       - usr/share/appdata
+      - usr/lib/
 
   deps:
     plugin: dump
