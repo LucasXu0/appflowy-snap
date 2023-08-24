@@ -17,7 +17,7 @@ apps:
   appflowy:
     command: opt/AppFlowy/AppFlowy
     extensions: [gnome]
-    desktop: usr/share/applications/appflowy.desktop
+    desktop: usr/share/applications/AppFlowy.desktop
     common-id: io.appflowy.AppFlowy
     plugs:
       - network
