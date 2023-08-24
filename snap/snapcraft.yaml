@@ -15,7 +15,7 @@ architectures:
 
 apps:
   appflowy:
-    command: opt/AppFlowy/AppFlowy
+    command: usr/lib/AppFlowy/AppFlowy
     extensions: [gnome]
     desktop: usr/share/applications/AppFlowy.desktop
     common-id: io.appflowy.AppFlowy
@@ -41,13 +41,10 @@ parts:
       - dpkg
     override-pull: |
       craftctl default
-      sed -i 's|Icon=/opt/AppFlowy/flowy_logo.svg|Icon=${SNAP}/opt/AppFlowy/flowy_logo.svg|' $SNAPCRAFT_PART_SRC/usr/share/applications/AppFlowy.desktop
       mkdir -p $SNAPCRAFT_PART_SRC/usr/share/appdata
       wget -O $SNAPCRAFT_PART_SRC/usr/share/appdata/io.appflowy.AppFlowy.appdata.xml https://raw.githubusercontent.com/flathub/io.appflowy.AppFlowy/master/io.appflowy.AppFlowy.appdata.xml
     prime:
-      - opt/AppFlowy
-      - usr/share/applications
-      - usr/share/appdata
+      - usr/share
 
   deps:
     plugin: dump
