@@ -45,7 +45,6 @@ parts:
       wget -O $SNAPCRAFT_PART_SRC/usr/share/appdata/io.appflowy.AppFlowy.appdata.xml https://raw.githubusercontent.com/flathub/io.appflowy.AppFlowy/master/io.appflowy.AppFlowy.appdata.xml
     prime:
       - usr/share/applications
-      - usr/share/dbus-1
       - usr/share/icons
       - usr/share/metainfo
       - usr/share/appdata
