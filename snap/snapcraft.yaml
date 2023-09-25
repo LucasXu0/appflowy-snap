@@ -29,7 +29,7 @@ slots:
   dbus-appflowy:
     interface: dbus
     bus: session
-    name: io.appflowy.AppFlowy
+    name: io.appflowy.appflowy
 
 parts:
   appflowy:
