@@ -34,7 +34,7 @@ slots:
 parts:
   appflowy:
     plugin: dump
-    source: https://github.com/AppFlowy-IO/AppFlowy/releases/download/$SNAPCRAFT_PROJECT_VERSION/AppFlowy_$SNAPCRAFT_PROJECT_VERSION-x86_64.deb
+    source: https://github.com/AppFlowy-IO/AppFlowy/releases/download/$SNAPCRAFT_PROJECT_VERSION/AppFlowy-$SNAPCRAFT_PROJECT_VERSION-linux-x86_64.deb
     parse-info: [usr/share/appdata/io.appflowy.AppFlowy.appdata.xml]
     build-packages:
       - wget
