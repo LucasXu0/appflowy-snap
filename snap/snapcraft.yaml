@@ -56,7 +56,9 @@ parts:
     source: http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
     stage-packages:
       - libkeybinder-3.0-0
+      - libvdpau1
     prime:
       - usr/lib/*/libkeybinder*so.*
       - usr/lib/*/libcrypto.so.*
       - usr/lib/*/libssl.so.*
+      - usr/lib/*/libvdpau.so.1*
