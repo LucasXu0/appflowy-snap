@@ -1,0 +1,65 @@
+name: Verify snap runtime deps
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'snap/**'
+      - 'tests/**'
+      - '.github/workflows/verify-snap.yml'
+  pull_request:
+    paths:
+      - 'snap/**'
+      - 'tests/**'
+      - '.github/workflows/verify-snap.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build snap
+        id: build
+        uses: snapcore/action-build@v1
+
+      - name: Install snap
+        run: sudo snap install --dangerous "${{ steps.build.outputs.snap }}"
+
+      - name: Scan for missing runtime libraries
+        run: |
+          set -eo pipefail
+
+          # Run the scan inside the snap's mount namespace so gnome-platform
+          # bind mounts and content-snap libraries are visible to ldd. Prepend
+          # AppFlowy's bundled lib dir to LD_LIBRARY_PATH so plugins that rely
+          # on libflutter_linux_gtk.so / libpdfium.so resolve correctly.
+          output=$(sudo snap run --shell appflowy 2>/dev/null <<'SCAN'
+          set -e
+          export LD_LIBRARY_PATH="$SNAP/usr/lib/AppFlowy/lib:${LD_LIBRARY_PATH:-}"
+          cd "$SNAP"
+          while IFS= read -r f; do
+            out=$(ldd "$f" 2>/dev/null | grep "not found" || true)
+            if [ -n "$out" ]; then
+              printf '\n--- %s\n%s\n' "$f" "$out"
+            fi
+          done < <(find usr/lib/AppFlowy -type f \( -name "*.so*" -o -executable \) ! -name "*.py" ! -name "*.sh")
+          exit
+          SCAN
+          )
+
+          if [ -n "$output" ]; then
+            echo "::error::Missing runtime libraries detected:"
+            echo "$output"
+            exit 1
+          fi
+          echo "No missing runtime libraries."
+
+      - name: Upload snap artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: appflowy-snap
+          path: ${{ steps.build.outputs.snap }}
+          if-no-files-found: ignore

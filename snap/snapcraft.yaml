@@ -57,8 +57,12 @@ parts:
     stage-packages:
       - libkeybinder-3.0-0
       - libvdpau1
+      - libxss1
+      - libxv1
     prime:
       - usr/lib/*/libkeybinder*so.*
       - usr/lib/*/libcrypto.so.*
       - usr/lib/*/libssl.so.*
       - usr/lib/*/libvdpau.so.1*
+      - usr/lib/*/libXss.so.1*
+      - usr/lib/*/libXv.so.1*
