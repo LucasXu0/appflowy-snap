@@ -31,24 +31,27 @@ jobs:
         run: |
           set -eo pipefail
 
-          # Reproduce the exact LD_LIBRARY_PATH that `snap run` sets up,
-          # including the gnome extension content snap.
-          ld_path=$(sudo snap run --shell appflowy <<< 'printf "%s" "$LD_LIBRARY_PATH"; exit' | tail -n1)
-          echo "Snap LD_LIBRARY_PATH:"
-          echo "$ld_path" | tr ':' '\n' | sed 's/^/  /'
-
-          cd /snap/appflowy/current
-          missing=""
+          # Run the scan inside the snap's mount namespace so gnome-platform
+          # bind mounts and content-snap libraries are visible to ldd. Prepend
+          # AppFlowy's bundled lib dir to LD_LIBRARY_PATH so plugins that rely
+          # on libflutter_linux_gtk.so / libpdfium.so resolve correctly.
+          output=$(sudo snap run --shell appflowy 2>/dev/null <<'SCAN'
+          set -e
+          export LD_LIBRARY_PATH="$SNAP/usr/lib/AppFlowy/lib:${LD_LIBRARY_PATH:-}"
+          cd "$SNAP"
           while IFS= read -r f; do
-            out=$(LD_LIBRARY_PATH="$ld_path" ldd "$f" 2>/dev/null | grep "not found" || true)
+            out=$(ldd "$f" 2>/dev/null | grep "not found" || true)
             if [ -n "$out" ]; then
-              missing+=$'\n--- '"$f"$'\n'"$out"
+              printf '\n--- %s\n%s\n' "$f" "$out"
             fi
-          done < <(find . -type f \( -name "*.so*" -o -executable \) ! -name "*.py" ! -name "*.sh")
+          done < <(find usr/lib/AppFlowy -type f \( -name "*.so*" -o -executable \) ! -name "*.py" ! -name "*.sh")
+          exit
+          SCAN
+          )
 
-          if [ -n "$missing" ]; then
+          if [ -n "$output" ]; then
             echo "::error::Missing runtime libraries detected:"
-            printf '%s\n' "$missing"
+            echo "$output"
             exit 1
           fi
           echo "No missing runtime libraries."
