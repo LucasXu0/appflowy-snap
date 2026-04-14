@@ -1,0 +1,62 @@
+name: Verify snap runtime deps
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'snap/**'
+      - 'tests/**'
+      - '.github/workflows/verify-snap.yml'
+  pull_request:
+    paths:
+      - 'snap/**'
+      - 'tests/**'
+      - '.github/workflows/verify-snap.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build snap
+        id: build
+        uses: snapcore/action-build@v1
+
+      - name: Install snap
+        run: sudo snap install --dangerous "${{ steps.build.outputs.snap }}"
+
+      - name: Scan for missing runtime libraries
+        run: |
+          set -eo pipefail
+
+          # Reproduce the exact LD_LIBRARY_PATH that `snap run` sets up,
+          # including the gnome extension content snap.
+          ld_path=$(sudo snap run --shell appflowy <<< 'printf "%s" "$LD_LIBRARY_PATH"; exit' | tail -n1)
+          echo "Snap LD_LIBRARY_PATH:"
+          echo "$ld_path" | tr ':' '\n' | sed 's/^/  /'
+
+          cd /snap/appflowy/current
+          missing=""
+          while IFS= read -r f; do
+            out=$(LD_LIBRARY_PATH="$ld_path" ldd "$f" 2>/dev/null | grep "not found" || true)
+            if [ -n "$out" ]; then
+              missing+=$'\n--- '"$f"$'\n'"$out"
+            fi
+          done < <(find . -type f \( -name "*.so*" -o -executable \) ! -name "*.py" ! -name "*.sh")
+
+          if [ -n "$missing" ]; then
+            echo "::error::Missing runtime libraries detected:"
+            printf '%s\n' "$missing"
+            exit 1
+          fi
+          echo "No missing runtime libraries."
+
+      - name: Upload snap artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: appflowy-snap
+          path: ${{ steps.build.outputs.snap }}
+          if-no-files-found: ignore
